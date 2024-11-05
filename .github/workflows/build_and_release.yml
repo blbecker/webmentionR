@@ -72,6 +72,8 @@ jobs:
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: true
 
       - name: Set Version Output
         run: echo "VERSION=${{ steps.gitversion.outputs.fullSemVer }}" >> $GITHUB_ENV
@@ -114,7 +116,7 @@ jobs:
           path: dist/mentionR
 
   release:
-    name: Release on Main
+    name: Release
     runs-on: ubuntu-latest
     needs: [build, calculate-version]
     if: github.ref == 'refs/heads/main'
@@ -129,7 +131,7 @@ jobs:
       - name: Tag Repo
         uses: richardsimko/update-tag@v1
         with:
-          tag_name: ${{needs.calculate-version.outputs.fullSemVer}}
+          tag_name: v${{needs.calculate-version.outputs.fullSemVer}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -138,7 +140,7 @@ jobs:
         with:
           draft: false
           prerelease: false
-          tag_name: "${{needs.calculate-version.outputs.fullSemVer}}"
-          name: "Release ${{needs.calculate-version.outputs.fullSemVer}}"
+          tag_name: "v${{needs.calculate-version.outputs.fullSemVer}}"
+          name: "Release v${{needs.calculate-version.outputs.fullSemVer}}"
           files: |
             dist/mentionR
