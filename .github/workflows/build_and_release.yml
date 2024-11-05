@@ -98,6 +98,28 @@ jobs:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v6
 
+      - name: Set Git Branch
+        id: set_branch
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "GIT_BRANCH=${{ github.head_ref }}" >> $GITHUB_ENV
+          else
+            echo "GIT_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+          fi
+
+      - name: Create Changelog
+        uses: TriPSs/conventional-changelog-action@dd734f74fce61a6e02f821ee1b5930bc79a23534 # v5
+        id: changelog
+        with:
+          github-token: ${{ github.token }}
+          git-user-name: "github-actions[bot]"
+          git-user-email: "github-actions[bot]@users.noreply.github.com"
+          version-file: .github/package.yaml
+          create-summary: true
+          skip-git-pull: true
+          preset: "conventionalcommits"
+          git-branch: '${{ env.GIT_BRANCH }}'
+
   build:
     name: Build
     runs-on: ubuntu-latest
